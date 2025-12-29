@@ -1,7 +1,7 @@
 # Labo 05 – Microservices, SOA, SBA, API Gateway, Rate Limit & Timeout
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Ets_quebec_logo.png" width="250">    
-ÉTS - LOG430 - Architecture logicielle - Chargé de laboratoire: Gabriel C. Ullmann, Automne 2025.
+ÉTS - LOG430 - Architecture logicielle - Chargé de laboratoire: Gabriel C. Ullmann.
 
 ## 🎯 Objectifs d'apprentissage
 - Apprendre à communiquer avec un microservice déjà existant
@@ -12,14 +12,14 @@
 
 Dans ce labo, nous allons ajouter des fonctionnalités de paiement à notre application `store_manager`. Ainsi comme nous avons les répertoires `orders` et `stocks` dans notre projet, nous pourrions simplement ajouter un répertoire `payments` et commencer à écrire nos fonctionnalités de paiement. Cependant, il vaut mieux développer une application complètement isolée dans un dépôt séparé - un microservice - pour les paiements en lieu de l'ajouter au `store_manager`. Ça nous donne plus de flexibilité de déploiement et évolution. Pour en savoir plus, veuillez lire la documentation architecturale dans le répertoire `/docs/arc42/architecture.pdf`.
 
-> ⚠️ ATTENTION : Pendant ce laboratoire, nous allons travailler avec ce dépôt (`log430-a25-labo5`), ainsi qu'avec un **deuxième dépôt**, [log430-a25-labo5-paiement](https://github.com/guteacher/log430-a25-labo5-payment). Veuillez lire le document `/docs/adr/adr001.md` dans `log430-a25-labo5-paiement` pour comprendre notre choix de créer un microservice séparé pour les fonctionnalités de paiement.
+> ⚠️ ATTENTION : Pendant ce laboratoire, nous allons travailler avec ce dépôt (`log430-labo5`), ainsi qu'avec un **deuxième dépôt**, [log430-labo5-paiement](https://github.com/guteacher/log430-labo5-payment). Veuillez lire le document `/docs/adr/adr001.md` dans `log430-labo5-paiement` pour comprendre notre choix de créer un microservice séparé pour les fonctionnalités de paiement.
 
 ### 1. Clonez les dépôts
 Créez vos propres dépôts à partir des dépôts gabarits (templates). Vous pouvez modifier la visibilité pour les rendre privés si vous voulez.
 ```bash
-git clone https://github.com/[votrenom]/log430-a25-labo5
-git clone https://github.com/[votrenom]/log430-a25-labo5-paiement
-cd log430-a25-labo5
+git clone https://github.com/[votrenom]/log430-labo5
+git clone https://github.com/[votrenom]/log430-labo5-paiement
+cd log430-labo5
 ```
 Ensuite, clonez votre dépôt sur votre ordinateur et sur votre serveur de déploiement (ex. VM). Veillez à ne pas cloner le dépôt d'origine.
 
@@ -63,14 +63,14 @@ Dans `orders/commands/write_order.py`, la fonction `add_order` effectue la créa
 > 💡 **Question 1** : Quelle réponse obtenons-nous à la requête à `POST /payments` ? Illustrez votre réponse avec des captures d'écran/terminal.
 
 ### 2. Utilisez le lien de paiement
-- Dans votre Postman, importez la collection Postman qui est dans `docs/collections` à `log430-a25-labo5`
-- Ensuite, importez aussi la collection sur `docs/collections` à `log430-a25-labo5-payment`
+- Dans votre Postman, importez la collection Postman qui est dans `docs/collections` à `log430-labo5`
+- Ensuite, importez aussi la collection sur `docs/collections` à `log430-labo5-payment`
 
-#### Dans `log430-a25-labo5`
+#### Dans `log430-labo5`
 - Créez une commande avec `POST /orders`. Vous obtiendra un `order_id`.
 - Cherchez la commande avec `GET /order/:id`. Vous obtiendra un `payment_id`.
 
-#### Dans `log430-a25-labo5-payment`
+#### Dans `log430-labo5-payment`
 - Faites une requête à `POST payments/process/:id` en utilisant le `payment_id` obtenu. Regardez l'onglet "Body" pour voir ce qu'on est en train d'envoyer dans la requête.
 - Faites une requête à `GET payments/:id` en utilisant le `payment_id` obtenu. Observez le résultat pour savoir se le paiement a éte realisé correctement.
 
@@ -112,11 +112,11 @@ Ajoutez l'endpoint de création de commandes à `config/krakend.json`. Nous l'ut
 Ensuite, **reconstruisez et redémarrez** le conteneur Docker. 
 
 ### 4. Mettez à jour la commande après le paiement
-Si les étapes de l'activité 2 fonctionnent, cela signifie que les paiements sont traités correctement. Cependant, si ces informations restent dans le service de paiement, elles ne sont pas très utiles. Modifiez `log430-a25-labo05-payment` pour faire en sorte qu'il appelle le endpoint `PUT /orders` dans `log430-a25-labo05` pour mettre à jour la commande de (modifier `is_paid` à `true`). Utilisez les documents architecturaux disponibles dans `log430-a25-labo05-payment` pour comprendre le fonctionnement du service et déterminer quel module ou quelle méthode doit être modifié(e).
+Si les étapes de l'activité 2 fonctionnent, cela signifie que les paiements sont traités correctement. Cependant, si ces informations restent dans le service de paiement, elles ne sont pas très utiles. Modifiez `log430-labo05-payment` pour faire en sorte qu'il appelle le endpoint `PUT /orders` dans `log430-labo05` pour mettre à jour la commande de (modifier `is_paid` à `true`). Utilisez les documents architecturaux disponibles dans `log430-labo05-payment` pour comprendre le fonctionnement du service et déterminer quel module ou quelle méthode doit être modifié(e).
 
 > ⚠️ ATTENTION : N'oubliez d'appeler l'endpoint tel que décrit dans `config/krakend.json`.
 
-> 💡 **Question 4** : Quelle méthode avez-vous dû modifier dans `log430-a25-labo05-payment` et qu'avez-vous modifié ? Justifiez avec un extrait de code.
+> 💡 **Question 4** : Quelle méthode avez-vous dû modifier dans `log430-labo05-payment` et qu'avez-vous modifié ? Justifiez avec un extrait de code.
 
 ### 5. Testez le rate limiting avec Locust
 En plus de fonctionner en tant qu'une façade pour nos APIs, nous pouvons aussi utiliser KrakenD pour limiter l'accès à nos APIs et les protéger des attaques DDOS, par exemple. Nous faisons ça avec rate limiting. Créez un nouveau test dans `locustfiles/locustfile.py` spécifiquement pour tester le rate limiting :
