@@ -28,9 +28,9 @@ def set_stock_for_product(product_id, quantity):
         if result.rowcount == 0:
             new_stock = Stock(product_id=product_id, quantity=quantity)
             session.add(new_stock)
+            response_message = f"rows added, product id {new_stock.product_id}"
             session.flush() 
             session.commit()
-            response_message = f"rows added: {new_stock.product_id}"
   
         r = get_redis_conn()
         r.hset(f"stock:{product_id}", "quantity", quantity)
