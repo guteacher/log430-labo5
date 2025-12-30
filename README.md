@@ -82,7 +82,7 @@ Dans `orders/commands/write_order.py`, la fonction `add_order` effectue la créa
 Ajoutez l'endpoint de création de commandes à `config/krakend.json`. Nous l'utiliserons lors des prochaines activités. Ce code ajoute une [limitation du nombre de requêtes](https://www.krakend.io/docs/endpoints/rate-limit/) à nos endpoints (par minute, par client).
 ```json
   {
-      "endpoint": "/store-api/orders",
+      "endpoint": "/store-manager-api/orders",
       "method": "POST",
       "backend": [
         {
@@ -98,7 +98,7 @@ Ajoutez l'endpoint de création de commandes à `config/krakend.json`. Nous l'ut
       }
   },
   {
-    "endpoint": "/store-api/orders",
+    "endpoint": "/store-manager-api/orders",
     "method": "PUT",
     "backend": [
       {
@@ -131,7 +131,7 @@ En plus de fonctionner en tant qu'une façade pour nos APIs, nous pouvons aussi 
       }   
       
       response = self.client.post(
-          "/store-api/orders",
+          "/store-manager-api/orders",
           json=payload
       )
       
@@ -177,7 +177,7 @@ def test_slow_endpoint(delay_seconds):
 De plus, ajoutez cet endpoint à `config/krakend.json`. Ensuite, **reconstruisez et redémarrez** le conteneur Docker. 
 ```json
   {
-    "endpoint": "/store-api/test/slow/{delay}",
+    "endpoint": "/store-manager-api/test/slow/{delay}",
     "method": "GET",
     "backend": [
       {
@@ -190,8 +190,8 @@ De plus, ajoutez cet endpoint à `config/krakend.json`. Ensuite, **reconstruisez
 ```
 
 Testez différents délais en utilisant votre navigateur :
-- `http://localhost:8080/store-api/test/slow/2` 
-- `http://localhost:8080/store-api/test/slow/10` 
+- `http://localhost:8080/store-manager-api/test/slow/2` 
+- `http://localhost:8080/store-manager-api/test/slow/10` 
 
 > 💡 **Question 5** : Que se passe-t-il dans le navigateur quand vous faites une requête avec un délai supérieur au timeout configuré (5 secondes) ? Quelle est l'importance du timeout dans une architecture de microservices ? Justifiez votre réponse avec des exemples pratiques.
 

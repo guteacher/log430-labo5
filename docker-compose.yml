@@ -84,7 +84,7 @@ services:
       start_period: 10s
 
   krakend:
-    image: devopsfaith/krakend:2.4
+    image: devopsfaith/krakend:2.7
     container_name: api-gateway
     ports:
       - "8080:8080"
