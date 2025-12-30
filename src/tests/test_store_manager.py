@@ -5,6 +5,7 @@ Auteurs : Gabriel C. Ullmann, Fabio Petrillo, 2025
 """
 
 import json
+import uuid
 from logger import Logger
 import pytest
 from store_manager import app
@@ -59,8 +60,9 @@ def test_stock_flow(client):
     assert stock_data['quantity'] == 5
     logger.debug(f"Stock verified: {stock_data['quantity']} units")
     
-    # Create a user for the order
-    user_data = {'name': 'Test User', 'email': 'test@example.com'}
+    # Create a user for the order. User emails MUST be unique.
+    random_email_address = f"t{uuid.uuid1()}@example.com"
+    user_data = {'name': 'Test User', 'email': random_email_address}
     response = client.post('/users',
                           data=json.dumps(user_data),
                           content_type='application/json')
