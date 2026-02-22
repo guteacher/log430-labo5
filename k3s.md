@@ -12,7 +12,7 @@ Dans ce tutoriel, vous allez utiliser [Kubernetes](https://github.com/kubernetes
 
 ## 💻 Exigences du projet
 Vous aurez besoin de :
-- 🏠 Votre ordinateur (votre environnement de développement, le nœud **worker**) contenant le code de ce dépôt
+- 🏠 Votre ordinateur (votre environnement de développement, le nœud **worker**) contenant le code de ce dépôt avec des implémentations recommendés dans le README
 - ☁️ 1 VM distante avec IP fixe (votre environnement de production, le nœud **master**)
 - Un compte Docker (vous pouvez en créer un gratuitement sur le site web)
 
