@@ -1,35 +1,36 @@
 # Tutoriel de déploiement avec k3s
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Ets_quebec_logo.png" width="250">    
-ÉTS - LOG430 - Architecture logicielle - Chargé de laboratoire: Gabriel C. Ullmann, Hiver 2026.
+ÉTS - LOG430 - Architecture logicielle - Chargé de laboratoire : Gabriel C. Ullmann, Hiver 2026.
 
-Dans ce tutoriel, vous allez utiliser Kubernetes (k8s), un orchestrateur de contenuer pour créer une grappe avec 2 serveurs et déployer l'application de votre environement dev à votre environement production de manière semi automatique, en pouvant repliquer votre application et ajouter plusieur noueds à la grappe de maniere simple.
+Dans ce tutoriel, vous allez utiliser [Kubernetes](https://github.com/kubernetes/kubernetes), un orchestrateur de conteneurs, pour créer une grappe avec 2 serveurs et déployer l'application de votre environnement de développement à votre environnement de production de manière semi-automatique, en pouvant répliquer votre application et ajouter plusieurs nœuds à la grappe de manière simple.
 
 ## 🎯 Objectifs d'apprentissage
-- Apprendre à utiliser un orchestrateur de conteneurs ([k3s](https://k3s.io/), une version simplifié de [Kubernetes](https://github.com/kubernetes/kubernetes))
-- Apprendre à utiliser [Docker Hub](https://hub.docker.com/repository/docker/nkinesis/store-manager/general) pour hebergér vos images Docker
-- Comprendre les avantages d'utiliser un orchestrateur de conteneur par rapport à simplement utiliser les conteneurs Docker
+- Apprendre à utiliser [k3s](https://k3s.io/), une version simplifiée de Kubernetes
+- Apprendre à utiliser [Docker Hub](https://hub.docker.com/repository/docker/nkinesis/store-manager/general) pour héberger vos images Docker
+- Se familiariser avec la terminologie des grappes de serveurs (master, worker, node, pod, service)
+- Comprendre les avantages d'utiliser un orchestrateur de conteneurs par rapport à simplement utiliser les conteneurs Docker
 
 ## 💻 Exigences du projet
-Vous aurez besoin de:
-- 🏠 Votre ordinateur (votre environement de developpement, le nœud **worker**) content le code de ce depot
-- ☁️ 1 VM distante avec IP fixé (votre environement de production, le nœud **master**)
-- Un compte Docker (vous pouver créer une gratuitement dans le site web)
+Vous aurez besoin de :
+- 🏠 Votre ordinateur (votre environnement de développement, le nœud **worker**) contenant le code de ce dépôt
+- ☁️ 1 VM distante avec IP fixe (votre environnement de production, le nœud **master**)
+- Un compte Docker (vous pouvez en créer un gratuitement sur le site web)
 
-Pour facilier la comprehension des instructions, l'environement developpement sera simbolisé par un emoji maison 🏠 et la VM sera simbolisé par un emoji nuage ☁️.
+Pour faciliter la compréhension des instructions, votre environnement de développement sera symbolisé par un emoji maison 🏠 et votre VM ou serveur distant sera symbolisée par un emoji nuage ☁️.
 
 ## ❓ Questions fréquentes
 
-### Pourquoi ne pas configurer plutot le nœud master dans mon environement de developpement? 
-Pour simplifier la configuration réseau, c'est mieux si le noeud master a l'IP fixé. Les workers peuvent avoir n'importe quel address IP, et il peu changer à n'importe quel moment sans impact dans notre configuration parce que chaque fois que l'IP change, le worker reconnectera au master. Comme la majorité des gens n'a pas un IP fixe dans son connexion d'internet chez eux, nous recommendes ce setup là. Cependant, si vous avez un IP fixé, vous pouvez créer le noeud master dans votre ordinateur.   
+### Pourquoi ne pas configurer plutôt le nœud master dans mon environnement de développement? 
+Pour simplifier la configuration réseau, il est préférable que le nœud master ait une IP fixe. Les workers peuvent avoir n'importe quelle adresse IP, et elle peut changer à n'importe quel moment sans impact sur notre configuration, car chaque fois que l'IP change, le worker se reconnecte au master. Comme la majorité des gens n'ont pas d'IP fixe dans leur connexion internet à domicile, nous recommandons cette configuration. Cependant, si vous avez une IP fixe chez vous, vous pouvez créer le nœud master sur votre ordinateur.
 
-### J'ai vu d'autres tutoriels de Kubernetes et c'est different. Quel est la manière correcte de le faire?
-Il y a pluseiurs differentes manières d'installer Kubernetes, et ça va changer en fonction de ton configuration réseau, nombre de serveurs dans la grappe, technologie de conteneurs utilisé, etc. Ici nous avons chosi k3s parce que c'est une solution simple et rapide pour créer une petite grappe de serveurs que sert des applications contenuerisés avec Docker (comme Store Manager, par example). 
+### J'ai vu d'autres tutoriels de Kubernetes et c'est différent. Quelle est la bonne manière de le faire ?
+Il existe plusieurs façons différentes d'installer Kubernetes, et cela variera en fonction de votre configuration réseau, du nombre de serveurs dans la grappe, de la technologie de conteneurs utilisée, etc. Ici, nous avons choisi `k3s` parce que c'est une solution simple et rapide pour créer une petite grappe de serveurs qui sert des applications conteneurisées avec Docker (comme Store Manager, par exemple).
 
 ## ⚙️ Setup
 
 ### 1. Configurez le nœud master ☁️
 
-Installez k3s :
+Installez `k3s` :
 ```bash
 curl -sfL https://get.k3s.io | sh -
 ```
@@ -39,7 +40,7 @@ Vérifiez que le nœud est prêt :
 kubectl get nodes
 ```
 
-Voici le résultat attendu:
+Voici le résultat attendu :
 ```bash
 NAME              STATUS   ROLES           
 log430-votre-vm   Ready    control-plane  
@@ -57,14 +58,14 @@ cat /etc/rancher/k3s/k3s.yaml
 
 ### 2. Configurez l'accès depuis votre machine de développement 🏠
 
-Indiquez le bon addresse IP de votre VM (`<ip-vm>`) et jeton (`<token>`):
+Indiquez la bonne adresse IP de votre VM (`<ip-vm>`) et le jeton (`<token>`) :
 ```bash
 curl -sfL https://get.k3s.io | K3S_URL=https://<ip-vm>:6443 K3S_TOKEN=<token> sh -
 ```
 
-> ⚠️ **ATTENTION** : Si votre machine de développement utilise une architecture ARM (Apple Silicon), vous devez d'abord installer k3d (`brew install k3d`). En lieu d'installer k3s directement dans le système d'exploitation, ça exécutera k3s dans un conteneur Docker qui créer une couche de compatibilité entre l'image k3d amd64 et le système arm64.
+> 📝 **NOTE** : Si votre machine de développement utilise une architecture ARM (Apple Silicon), vous devez d'abord installer `k3d` (`brew install k3d`). Au lieu d'installer `k3s` directement dans le système d'exploitation, cela exécutera `k3s` dans un conteneur Docker qui crée une couche de compatibilité entre l'image `k3d` amd64 et votre système arm64.
 
-Sur votre machine de développement, créez le fichier kubeconfig. Collez le contenu copié depuis le fichier `k3s.yaml` dans la VM:
+Sur votre machine de développement, créez le fichier `kubeconfig`. Dans ce fichier, collez le contenu copié depuis le fichier `k3s.yaml` pendant l'étape précédante :
 ```bash
 mkdir -p ~/.kube
 nano ~/.kube/config
@@ -80,29 +81,29 @@ Vérifiez la connexion :
 kubectl get nodes
 ```
 
-Si tout est bien configuré, vous devriez voir le node master sur la liste.
+Si tout est bien configuré, vous devriez voir le nœud master dans la liste de nœuds.
 
 ### 3. Publiez votre image sur Docker Hub 🏠
 
-Docker Hub offre un nombre illimité de dépôts publics, ou jusqu'à 1 dépôt privé gratuit. Ici, nous vous recommendons d'utiliser un dépot public. Ouvrez une nouvelle fenetre terminal dans le fichier du projet `log430-labo5`, exécutez `docker login` et suivez les instructions pour authentifier dans votre navigateur.
+Docker Hub offre un nombre illimité de dépôts publics, ou jusqu'à 1 dépôt privé gratuit. Ici, nous vous recommandons d'utiliser un dépôt public. Ouvrez une nouvelle fenêtre de terminal dans le répertoire du projet `log430-labo5`, exécutez `docker login` et suivez les instructions pour vous authentifier dans votre navigateur.
 
 ```bash
 docker login
 ```
 
-Ensuite, utilisez votre nom d'utilisateur pour créer et televerser une nouvelle image. Remplacez `<nom-app>` par `store-manager`.
+Ensuite, utilisez votre nom d'utilisateur pour créer et téléverser une nouvelle image. Remplacez `<nom-app>` par `store-manager`.
 ```bash
 docker build -t <nom-utilisateur>/<nom-app>:latest .
 docker push <nom-utilisateur>/<nom-app>:latest
 ```
 
-> 📝 **NOTE** : Si votre machine de développement utilise une architecture ARM (Apple Silicon), vous devez construire une image multi-plateforme pour qu'elle fonctionne sur une VM ou serveur AMD64 :
+> 📝 **NOTE** : Si votre machine de développement utilise une architecture ARM (Apple Silicon), vous devez construire une image multi-plateforme pour qu'elle fonctionne sur une VM ou un serveur AMD64 :
 ```bash
 docker buildx create --use
 docker buildx build --platform linux/amd64,linux/arm64 -t <votre-utilisateur>/<nom-app>:latest --push .
 ```
 
-Remplacez le nom de l'image dans le manifeste Kubernetes dans ce dépôt (`k8s-manifests.yml`) par le vôtre. Si vous voulez, vous pouvez garder l'image default (`nkinesis/store-manager:latest`), cependant vous ne pourrez pas changer le code dans l'image parce que ce n'est pas dans votre compte.
+Remplacez le nom de l'image dans le manifeste Kubernetes de ce dépôt (`k8s-manifests.yml`) par le vôtre. Si vous le souhaitez, vous pouvez conserver l'image par défaut (`nkinesis/store-manager:latest`), mais vous ne pourrez pas modifier le code de l'image puisqu'elle n'est pas dans votre compte.
 
 ### 4. Créez les ConfigMaps 🏠
 
@@ -113,7 +114,7 @@ kubectl create configmap krakend-config --from-file=krakend.json=./config/kraken
 kubectl create configmap db-init --from-file=./db-init/
 ```
 
-Déployez!
+Déployez !
 
 ```bash
 kubectl apply -f k8s-manifests.yml
@@ -127,7 +128,7 @@ Surveillez le démarrage des pods :
 kubectl get pods -w
 ```
 
-Voici le résultat attendu:
+Voici le résultat attendu :
 ```bash
 NAME                             READY   STATUS    RESTARTS      
 api-gateway-786b9dffdb-hkx2t     1/1     Running   1 (1m ago)    
@@ -136,14 +137,14 @@ redis-67555ffc9b-xgtxb           1/1     Running   1 (1m ago)
 store-manager-7f675d8f65-xjc2v   1/1     Running   1 (1m ago) 
 ```
 
-> 📝 **NOTE** : Un **pod** consiste en un ou plusieurs conteneurs qui ont la garantie d'être co-localisés sur une machine et peuvent en partager les ressources de calcul.
+> 📝 **NOTE** : Un **pod** consiste en un ou plusieurs conteneurs qui ont la garantie d'être co-localisés sur une même machine et peuvent en partager les ressources de calcul.
 
 Affichez les services et leurs ports :
 ```bash
 kubectl get services
 ```
 
-Voici le résultat attendu:
+Voici le résultat attendu :
 ```bash
 NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          
 api-gateway     NodePort    10.43.5.109     <none>        8080:31628/TCP   
@@ -153,27 +154,28 @@ redis           ClusterIP   10.43.61.252    <none>        6379/TCP
 store-manager   NodePort    10.43.35.136    <none>        5000:32080/TCP   
 ```
 
-Les services de type `NodePort` sont accessibles depuis l'extérieur via `http://<remote-server-ip>:<port>`. Par exemple, pour connecter à Store Manager directement, utilisez Postman pour envoyer une requête à `http://<remote-server-ip>:32080`. Le port `32080` est selectioné de manière aléatoire par k3s.
+Les services de type `NodePort` sont accessibles depuis l'extérieur via `http://<remote-server-ip>:<port>`. Par exemple, pour se connecter à Store Manager directement, utilisez Postman pour envoyer une requête à `http://<remote-server-ip>:32080`. Le port `32080` est sélectionné de manière aléatoire par k3s.
 
 
-> ⚠️ **ATTENTION** : N'utilisez jamais les IP dans la colonne `CLUSTER-IP`. Ce sont les IPs internes dans les conteneurs. Pour la communication externe, utilisez l'IP que vous avez defini pour votre VM.
+> ⚠️ **ATTENTION** : N'utilisez jamais les IP dans la colonne `CLUSTER-IP`. Ce sont les IP internes des conteneurs. Pour la communication externe, utilisez l'IP que vous avez définie pour votre VM.
 
-> 📝 **NOTE** : Dans ce tutoriel, les services `store-manager` et `api-gateway` ont des ports ouverts à l'exterieur pour faciliter la debogage et experimentation. Dans un environnement de production normalement seulment l'API gateway serait ouvert à l'exterieur.
+> 📝 **NOTE** : Dans ce tutoriel, les services `store-manager` et `api-gateway` ont des ports ouverts vers l'extérieur pour faciliter le débogage et l'expérimentation. Dans un environnement de production, normalement seule l'API Gateway serait ouverte vers l'extérieur.
 
 ### 6. Mettez à jour l'application 🏠
 
-À chaque fois qui vous changez le code et veux redeploier, reconstruissez et poussez l'image à Docker Hub, puis redémarrer le déploiement :
+À chaque fois que vous modifiez le code et souhaitez redéployer, reconstruisez et poussez l'image vers Docker Hub, puis redémarrez le déploiement :
 
 ```bash
-docker buildx build --platform linux/amd64,linux/arm64 -t <votre-utilisateur>/<nom-app>:latest --push .
+docker build -t <nom-utilisateur>/<nom-app>:latest .
+docker push <nom-utilisateur>/<nom-app>:latest
 kubectl rollout restart deployment store-manager
 ```
 
-### 7. Ajoutez un nouveau noeud (optionnel)
-Pour ajouter d'autres nodes dans la grappe, repetez l'étape 2.
+### 7. Ajoutez un nouveau nœud (optionnel)
+Pour ajouter d'autres nœuds à la grappe (ex. une autre VM), répétez l'étape 2.
 
-### 8. Changez le nombre de replicas (optionnel)
-Changez l'attribut `replicas` dans `k8s-manifests.yml`. Ici nous utilison la valeur default `replicas: 1`. Alternativement:
+### 8. Changez le nombre de réplicas (optionnel)
+Modifiez l'attribut `replicas` dans `k8s-manifests.yml`. Ici, nous utilisons la valeur par défaut `replicas: 1`. Alternativement :
 
 ```bash
 kubectl scale deployment store-manager --replicas=3
