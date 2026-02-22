@@ -26,6 +26,9 @@ Pour simplifier la configuration réseau, il est préférable que le nœud maste
 ### J'ai vu d'autres tutoriels de Kubernetes et c'est différent. Quelle est la bonne manière de le faire ?
 Il existe plusieurs façons différentes d'installer Kubernetes, et cela variera en fonction de votre configuration réseau, du nombre de serveurs dans la grappe, de la technologie de conteneurs utilisée, etc. Ici, nous avons choisi `k3s` parce que c'est une solution simple et rapide pour créer une petite grappe de serveurs qui sert des applications conteneurisées avec Docker (comme Store Manager, par exemple).
 
+### Pourquoi mon nœud k3s ne démarre-t-il pas ?
+Veuillez suivre attentivement les instructions et vérifier si votre serveur dispose de ressources de calcul suffisantes (RAM, CPU et stockage). 2 Go de RAM devraient suffire pour ce tutoriel. Si nécessaire, arrêtez ou supprimez les autres conteneurs présents sur votre serveur afin d'économiser des ressources.
+
 ## ⚙️ Setup
 
 ### 1. Configurez le nœud master ☁️
